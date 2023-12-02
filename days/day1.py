@@ -2,7 +2,7 @@ from days.part_enum import Part
 
 
 class Day1:
-    lines: list
+    lines: list[str]
     number_map: dict = {
         "one": 1,
         "two": 2,
@@ -16,7 +16,7 @@ class Day1:
     }
     max_number_length: int = max(len(key) for key in number_map)
 
-    def __init__(self, lines: list):
+    def __init__(self, lines: list[str]):
         self.lines = lines
 
     def part1(self) -> int:

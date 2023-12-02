@@ -54,23 +54,3 @@ class Day2:
                 power *= bag[key]
             power_sum += power
         return power_sum
-
-    def part(self) -> int:
-        result = 0
-        impossible_games = 0
-        games = 0
-        for idx, line in enumerate(self.lines):
-            games += idx + 1
-            line = line.replace(",", "")
-            line = line.replace(";", "")
-            is_number = True
-            number = 0
-            for word in line.split(" ")[2:]:
-                if is_number:
-                    number = int(word)
-                    is_number = False
-                else:
-                    is_number = True
-                    if self.bag[word] < number:
-                        impossible_games += idx + 1
-                        break

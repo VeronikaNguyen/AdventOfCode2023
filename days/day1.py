@@ -1,3 +1,6 @@
+from days.part_enum import Part
+
+
 class Day1:
     lines: list
     number_map: dict = {
@@ -17,12 +20,12 @@ class Day1:
         self.lines = lines
 
     def part1(self) -> int:
-        return self.combine_first_and_last_number(1)
+        return self.combine_first_and_last_number(Part.Part1)
 
     def part2(self) -> int:
-        return self.combine_first_and_last_number(2)
+        return self.combine_first_and_last_number(Part.Part2)
 
-    def combine_first_and_last_number(self, part: int) -> int:
+    def combine_first_and_last_number(self, part: Part) -> int:
         result = 0
         for line in self.lines:
             first_number = self.read_first_number_in_line(line, part)
@@ -31,27 +34,27 @@ class Day1:
         return result
 
     @staticmethod
-    def read_first_number_in_line(line: str, part: int) -> int:
+    def read_first_number_in_line(line: str, part: Part) -> int:
         for idx, character in enumerate(line):
             if character.isdigit():
                 number = int(character)
                 return number
             window = line[max(0, idx - 5): idx + 1]
-            if part == 2:
+            if part == Part.Part2:
                 for key in Day1.number_map:
                     if key in window:
                         number = Day1.number_map[key]
                         return number
 
     @staticmethod
-    def read_last_number_in_line(line: str, part: int) -> int:
+    def read_last_number_in_line(line: str, part: Part) -> int:
         for idx in range(len(line) - 1, -1, -1):
             character = line[idx]
             if character.isdigit():
                 number = int(character)
                 return number
             window = line[idx: min(len(line), idx + 6)]
-            if part == 2:
+            if part == Part.Part2:
                 for key in Day1.number_map:
                     if key in window:
                         number = Day1.number_map[key]

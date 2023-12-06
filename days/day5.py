@@ -1,105 +1,90 @@
 from collections import defaultdict
 
+from days.part_enum import Part
+
+
 class Day5:
+    keys: defaultdict[int, set[tuple]]
+    maps_keys: defaultdict[int, list[tuple]]
+    maps_values: defaultdict[int, list[tuple]]
 
     def __init__(self, lines: list[str]):
+        self.keys = defaultdict(set)
+        self.map_keys = defaultdict(list)
+        self.map_values = defaultdict(list)
         self.lines = lines
-        self.seeds = defaultdict(list)
-        self.soil = defaultdict(list)
-        self.intersections = defaultdict(list)
-        self.intersections_map = defaultdict(list)
+
+    def read_lines(self, part: Part) -> None:
+        map_idx = -1
+        for line in self.lines:
+            split_line = line.split()
+            if len(split_line) == 0:
+                map_idx += 1
+            elif map_idx == -1:      # read seed values and write it into keys[0]
+                if part == Part.Part1:
+                    for idx in range(1, len(split_line)):
+                        self.keys[0].add((int(split_line[idx]), int(split_line[idx])))
+                elif part == Part.Part2:
+                    for idx in range(1, len(split_line), 2):
+                        self.keys[0].add((int(split_line[idx]), int(split_line[idx]) + int(split_line[idx + 1]) - 1))
+            elif len(split_line) == 3:
+                self.map_keys[map_idx].append((int(split_line[1]), int(split_line[1]) + int(split_line[2]) - 1))
+                self.map_values[map_idx].append((int(split_line[0]), int(split_line[0]) + int(split_line[2]) - 1))
 
     def part1(self) -> int:
-        counter = 0
-        seen = set()
-        for l in self.lines:
-            line = l.split()
-            if len(line) == 0:
-                counter += 1
-                if counter >= 2:
-                    for seed in self.soil[counter - 2]:
-                        if seed not in seen:
-                            self.soil[counter - 1].append(seed)
-                    seen = set()
-            elif counter == 0:
-                for word in line[1:]:
-                    self.soil[0].append(int(word))
-            elif len(line) == 3:
-                ls = [int(num) for num in line]
-                for seed in self.soil[counter - 1]:
-                    if ls[1] <= seed <= ls[1] + ls[2]:
-                        seen.add(seed)
-                        self.soil[counter].append(ls[0] + seed - ls[1])
-
-        return min([num for num in self.soil[7]])
+        self.read_lines(Part.Part1)
+        return self.compute_mapping_solution()
 
     def part2(self) -> int:
-        counter = 0
-        for l in self.lines:
-            line = l.split()
-            if len(line) == 0:
-                counter += 1
-            elif counter == 0:
-                isStart = True
-                startNumber = 0
-                for word in line[1:]:
-                    if isStart:
-                        startNumber = int(word)
-                        isStart = False
+        self.read_lines(Part.Part2)
+        return self.compute_mapping_solution()
+
+    def compute_mapping_solution(self) -> int:
+        for map_idx in range(len(self.map_keys)):
+            for idx, map_key in enumerate(self.map_keys[map_idx]):
+                seen_keys = set()
+                while len(self.keys[map_idx]) > 0:
+                    key = list(self.keys[map_idx])[0]
+                    if map_key[0] <= key[0] and key[1] <= map_key[1]:
+                        self.keys[map_idx + 1].add((
+                            self.map_values[map_idx][idx][0] + key[0] - map_key[0],
+                            self.map_values[map_idx][idx][0] + key[1] - map_key[0]
+                        ))
+                    elif key[0] <= map_key[0] and map_key[1] <= key[1]:
+                        self.keys[map_idx + 1].add((
+                            self.map_values[map_idx][idx][0],
+                            self.map_values[map_idx][idx][1]
+                        ))
+                        if key[0] < map_key[0]:
+                            seen_keys.add((
+                                key[0], map_key[1] - 1
+                            ))
+                        if map_key[1] < key[1]:
+                            seen_keys.add((
+                                map_key[1] + 1, key[1]
+                            ))
+                    elif key[0] <= map_key[1] < key[1]:
+                        self.keys[map_idx + 1].add((
+                            self.map_values[map_idx][idx][0] + key[0] - map_key[0],
+                            self.map_values[map_idx][idx][1]
+                        ))
+                        seen_keys.add((
+                            map_key[1] + 1, key[1]
+                        ))
+                    elif key[0] < map_key[0] <= key[1]:
+                        self.keys[map_idx + 1].add((
+                            self.map_values[map_idx][idx][0],
+                            self.map_values[map_idx][idx][0] + key[1] - map_key[0]
+                        ))
+                        seen_keys.add((
+                            key[0], map_key[1] - 1
+                        ))
                     else:
-                        self.seeds[0].append(tuple([startNumber, startNumber + int(word) - 1]))
-                        self.soil[0].append(tuple([startNumber, startNumber + int(word) - 1]))
-                        isStart = True
-            elif len(line) == 3:
-                ls = [int(num) for num in line]
-                self.intersections[counter].append(tuple([ls[1], ls[1] + ls[2] - 1]))
-                self.intersections_map[counter].append(tuple([ls[0], ls[0] + ls[2] - 1]))
-
-        counter = 0
-        for idx in range(1, 8):
-            for intersections_idx, value in enumerate(self.intersections[idx]):
-                t0, t1 = value      # interval start and end values
-                for s0, s1 in self.soil[counter]:
-                    if t0 <= s0 and s1 <= t1:
-                        start = self.intersections_map[idx][intersections_idx][0] + s0 - t0
-                        end = self.intersections_map[idx][intersections_idx][0] + s1 - t0
-                        self.seeds[idx].append(tuple([start, end]))
-                    elif t0 <= s0 and s1 > t1:
-                        start = self.intersections_map[idx][intersections_idx][0] + s0 - t0
-                        end = self.intersections_map[idx][intersections_idx][1]
-                        self.seeds[idx].append(tuple([start, end]))
-
-                        start = s1 + 1
-                        end = t1
-                        self.soil[counter + 1].append(tuple([start, end]))
-                    elif s1 >= t1 and s0 < t0:
-                        start = self.intersections_map[idx][intersections_idx][0]
-                        end = self.intersections_map[idx][intersections_idx][0] + s1 - t0
-                        self.seeds[idx].append(tuple([start, end]))
-
-                        start = s0
-                        end = t0 - 1
-                        self.soil[counter + 1].append(tuple([start, end]))
-                    elif t0 >= s0 and s1 >= t1:
-                        start = self.intersections_map[idx][intersections_idx][0]
-                        end = self.intersections_map[idx][intersections_idx][1]
-                        self.seeds[idx].append(tuple([start, end]))
-
-                        if s1 > t1:
-                            start = s1 + 1
-                            end = t1
-                            self.soil[counter + 1].append(tuple([start, end]))
-                        if t0 > s0:
-                            start = s0
-                            end = t0 - 1
-                            self.soil[counter + 1].append(tuple([start, end]))
-                    else:
-                        self.soil[counter + 1].append(tuple([s0, s1]))
-                    counter += 1
-            for value in self.soil[counter]:
-                self.soil[counter + 1].append(value)
-            for value in self.seeds[idx]:
-                self.soil[counter + 1].append(value)
-            counter += 1
-
-        return 1
+                        seen_keys.add(key)
+                    self.keys[map_idx].remove(key)
+                for key in seen_keys:
+                    self.keys[map_idx].add(key)
+            for key in self.keys[map_idx]:
+                self.keys[map_idx + 1].add(key)
+        print(sorted([tup[0] for tup in list(self.keys[len(self.keys) - 1])]))
+        return min([tup[0] for tup in list(self.keys[len(self.keys) - 1])])

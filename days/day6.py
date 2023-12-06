@@ -2,6 +2,10 @@ from days.part_enum import Part
 
 
 class Day6:
+    lines: list[str]
+    time: list[int]
+    distance: list[int]
+
     def __init__(self, lines: list[str]):
         self.lines = lines
         self.time = []

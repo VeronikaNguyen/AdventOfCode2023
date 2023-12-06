@@ -57,7 +57,7 @@ class Day5:
                         ))
                         if key[0] < map_key[0]:
                             seen_keys.add((
-                                key[0], map_key[1] - 1
+                                key[0], map_key[0] - 1
                             ))
                         if map_key[1] < key[1]:
                             seen_keys.add((
@@ -77,7 +77,7 @@ class Day5:
                             self.map_values[map_idx][idx][0] + key[1] - map_key[0]
                         ))
                         seen_keys.add((
-                            key[0], map_key[1] - 1
+                            key[0], map_key[0] - 1
                         ))
                     else:
                         seen_keys.add(key)
@@ -86,5 +86,4 @@ class Day5:
                     self.keys[map_idx].add(key)
             for key in self.keys[map_idx]:
                 self.keys[map_idx + 1].add(key)
-        print(sorted([tup[0] for tup in list(self.keys[len(self.keys) - 1])]))
         return min([tup[0] for tup in list(self.keys[len(self.keys) - 1])])

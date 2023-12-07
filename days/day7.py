@@ -1,0 +1,161 @@
+from collections import defaultdict
+
+
+class Day7:
+
+    def __init__(self, lines: list[str]):
+        self.lines = lines
+        self.card_order = [str(num) for num in range(2, 10)] + ["T", "J", "Q", "K", "A"]
+        self.card_order_J = ["J"] + [str(num) for num in range(2, 10)] + ["T", "Q", "K", "A"]
+        self.strength = {card: idx for idx, card in enumerate(self.card_order)}
+        self.strength_J = {card: idx for idx, card in enumerate(self.card_order_J)}
+        self.hand = []
+        self.bid = {}
+        self.read_lines()
+
+    def read_lines(self) -> None:
+        for line in self.lines:
+            self.hand.append(line.split()[0])
+            self.bid[line.split()[0]] = int(line.split()[1])
+
+    def part1(self) -> int:
+        ordered_hand = []
+        ordered = False
+        for hand in self.hand:
+            for idx, o_hand in enumerate(ordered_hand):
+                if self.determine_value_of_hand(hand) < self.determine_value_of_hand(o_hand):
+                    ordered_hand.insert(idx, hand)
+                    ordered = True
+                    break
+                if self.determine_value_of_hand(hand) == self.determine_value_of_hand(o_hand):
+                    if self.compare_two_equal_value_hands(hand, o_hand) == 2:
+                        ordered_hand.insert(idx, hand)
+                        ordered = True
+                        break
+            if not ordered:
+                ordered_hand.append(hand)
+            ordered = False
+        result = 0
+        for rank, hand in enumerate(ordered_hand):
+            result += (rank + 1) * self.bid[hand]
+        return result
+
+
+    def part2(self) -> int:
+        ordered_hand = []
+        ordered = False
+        for hand in self.hand:
+            for idx, o_hand in enumerate(ordered_hand):
+                if self.determine_value_of_hand_J(hand) == None or self.determine_value_of_hand_J(o_hand) == None:
+                    print(hand)
+                if self.determine_value_of_hand_J(hand) < self.determine_value_of_hand_J(o_hand):
+                    ordered_hand.insert(idx, hand)
+                    ordered = True
+                    break
+                if self.determine_value_of_hand_J(hand) == self.determine_value_of_hand_J(o_hand):
+                    if self.compare_two_equal_value_hands_J(hand, o_hand) == 2:
+                        ordered_hand.insert(idx, hand)
+                        ordered = True
+                        break
+            if not ordered:
+                ordered_hand.append(hand)
+            ordered = False
+        result = 0
+        for rank, hand in enumerate(ordered_hand):
+            result += (rank + 1) * self.bid[hand]
+        return result
+
+    def determine_value_of_hand(self, hand) -> int:
+        cards = defaultdict(lambda: 0)
+        for card in hand:
+            cards[card] += 1
+
+        keys = cards.keys()
+        if len(keys) == 1:
+            return 8
+        elif len(keys) == 2:
+            for key in keys:
+                if cards[key] == 4:
+                    return 7
+            else:
+                return 6
+        elif len(keys) == 3:
+            for key in keys:
+                if cards[key] == 3:
+                    return 5
+            else:
+                return 4
+        elif len(keys) == 4:
+            return 3
+        else:
+            return 2
+
+    def determine_value_of_hand_J(self, hand) -> int:
+        num_J = 0
+        for card in hand:
+            if card == "J":
+                num_J += 1
+        cards = defaultdict(lambda: 0)
+        for card in hand:
+            cards[card] += 1
+
+        keys = cards.keys()
+        if len(keys) == 1:
+            return 8            # five of a kind
+        elif len(keys) == 2:
+            for key in keys:
+                if cards[key] == 4 and num_J == 0:
+                    return 7        # four of a kind
+                elif cards[key] == 4 and num_J == 1:
+                    return 8        # five of a kind
+            else:
+                if num_J == 0:
+                    return 6        # full house
+                else:
+                    return 8        # five of a kind
+        elif len(keys) == 3:
+            for key in keys:
+                if cards[key] == 3 and num_J == 0:
+                    return 5        # three of a kind
+                elif cards[key] == 3 and num_J == 1:
+                    return 7        # four of a kind
+                elif cards[key] == 3 and num_J == 3:
+                    return 7  # four of a kind
+            else:
+                if num_J == 0:      # two pair
+                    return 4
+                elif num_J == 1:
+                    return 6        # full house
+                if num_J == 2:
+                    return 7        # four of a kind
+        elif len(keys) == 4:
+            if num_J == 0:
+                return 3            # one pair
+            elif num_J == 1:
+                return 5            # three of a kind
+            elif num_J == 2:
+                return 5            # three of a kind
+        else:
+            if num_J == 0:
+                return 2            # high card
+            else:
+                return 3
+
+    def compare_two_equal_value_hands(self, hand_one, hand_two) -> int:
+        for idx, h1 in enumerate(hand_one):
+            h2 = hand_two[idx]
+            if h1 != h2:
+                if self.strength[h1] > self.strength[h2]:
+                    return 1
+                else:
+                    return 2
+
+    def compare_two_equal_value_hands_J(self, hand_one, hand_two) -> int:
+        for idx, h1 in enumerate(hand_one):
+            h2 = hand_two[idx]
+            if h1 != h2:
+                if self.strength_J[h1] > self.strength_J[h2]:
+                    return 1
+                else:
+                    return 2
+

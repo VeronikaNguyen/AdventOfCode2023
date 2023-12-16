@@ -24,7 +24,7 @@ class Day9:
             last_diff_sum += self.determine_extrapolated_values(numbers)[0]
         return last_diff_sum
 
-    def part2(self):
+    def part2(self) -> int:
         first_diff_sum = 0
         for numbers in self.numbers_list:
             first_diff_sum += self.determine_extrapolated_values(numbers)[1]

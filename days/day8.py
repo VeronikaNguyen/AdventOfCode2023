@@ -22,7 +22,7 @@ class Day8:
     def part1(self, loc: str) -> int:
         return self.count_steps(loc, Part.Part1)
 
-    def part2(self):
+    def part2(self) -> int:
         starts = []
         for key in self.map:
             if key[2] == "A":

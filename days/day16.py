@@ -65,7 +65,7 @@ class Day16:
             max_energized_tiles = max(self.compute_energized_tiles(beams), max_energized_tiles)
         return max_energized_tiles
 
-    def compute_energized_tiles(self, beams: list[tuple[int, int, str]]):
+    def compute_energized_tiles(self, beams: list[tuple[int, int, str]]) -> int:
         seen_beams = set()
         while len(beams) > 0:
             beam = beams.pop(0)

@@ -18,9 +18,9 @@ class TestDay16(unittest.TestCase):
     def test_part2(self):
         reader = FileReader("testdata/testdata_day16")
         day16 = Day16(reader.read_lines())
-        self.assertEqual(day16.part2(), 0)
+        self.assertEqual(day16.part2(), 51)
 
     def test_part2_solution(self):
         reader = FileReader("testdata/data_day16")
         day16 = Day16(reader.read_lines())
-        self.assertEqual(day16.part2(), 0)
+        self.assertEqual(day16.part2(), 7943)
